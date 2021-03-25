@@ -126,7 +126,9 @@ namespace Komodo.Runtime
         [Header("UI Client Tag ")]
         //  public ChildTextCreateOnCall clientTagSetup;
         private bool isMainClientInitialized = false;
-        private GameObject mainPlayer;
+        private GameObject cameraSet;
+
+        private GameObject handsParent;
 
         [Header("Spawn_Setup")]
         public GameObject clientPrefab;
@@ -195,8 +197,11 @@ namespace Komodo.Runtime
         {
             
             //WebGLMemoryStats.LogMoreStats("ClientSpawnManager Start BEFORE");
-            mainPlayer = GameObject.FindGameObjectWithTag("Player");
-            if (!mainPlayer) Debug.LogError("Could not find mainplayer with tag: Player in ClientSpawnManager.cs");
+            cameraSet = GameObject.FindGameObjectWithTag("CameraSet");
+            if (!cameraSet) Debug.LogError("Could not find CameraSet with tag CameraSet in ClientSpawnManager.cs");
+
+            handsParent = GameObject.FindGameObjectWithTag("Hands");
+            if (!handsParent) Debug.LogError("Could not find HandsParent with tag Hands in ClientSpawnManager.cs");
 
             //wait until our avatars are setup in the scene
             yield return StartCoroutine(InstantiateReservedClients());
@@ -430,14 +435,14 @@ namespace Komodo.Runtime
                         var ROT = entityManager.GetComponentData<Rotation>(avatarEntityGroupFromClientId[clientID].rootEntity).Value.value;//.entity_data.rot;
 
                         //To prevent offset issues when working with editor
-#if !UNITY_EDITOR
-                    //GameObject
-                    mainPlayer.transform.position = temp.position;
-                    mainPlayer.transform.rotation = new Quaternion(ROT.x, ROT.y, ROT.z, ROT.w);
+#if !UNITY_EDITOR && UNITY_WEBGL
+                        //GameObject
+                        cameraSet.transform.position = temp.position;
+                        cameraSet.transform.rotation = new Quaternion(ROT.x, ROT.y, ROT.z, ROT.w);
 
-                    //hands entity data
-                    mainPlayer.transform.parent.GetChild(0).localPosition = temp.position;
-                    mainPlayer.transform.parent.GetChild(0).localRotation = new Quaternion(ROT.x, ROT.y, ROT.z, ROT.w);
+                        //hands entity data
+                        handsParent.transform.position = temp.position;
+                        handsParent.transform.rotation = new Quaternion(ROT.x, ROT.y, ROT.z, ROT.w);
 #endif
 
                         //Turn Off Dummy 
